@@ -16,4 +16,4 @@ print_proc.o: src/asm/print_proc.s
 	$(ASM) $(ASMFLAGS) src/asm/print_proc.s -o print_proc.o
 
 test: app
-	build/app -9
+	build/app -9 0

@@ -3,17 +3,24 @@
 
 #include "print_proc.h"
 
-const long value0 = 0;
-
 
 void wrapper(long value);
 
 int main(int argc, char *argv[]){
-  if (argc <= 1) return EXIT_SUCCESS;
+  if (argc <= 2) return EXIT_SUCCESS;
 
-  int value = atoi(argv[1]);
+  char *ptr;
+  
+  long value0 = strtol(argv[1], &ptr, 16);
+  long value1 = strtol(argv[2], &ptr, 16);
 
-  printf("input 0: %d\n", value);
+  long value = value0 + value1;
+  
+  printf("input 0: %ld\n" "input 1: %ld\n" "value: %ld\n",
+        value0,
+        value1,
+        value
+  );
   
   wrapper(value);
   
@@ -21,13 +28,13 @@ int main(int argc, char *argv[]){
 }
 
 void wrapper(long value){
-  int ola[128] = {};
-  ola[0] = 9;
-  ola[120] = -3;
+  print_hex((unsigned long)value);  
 
-  print_hex(value);  
-  print_u64(value);
-  print_i64(value);  
-  print_i32(value);  
-  print_i16(value);   
+  print_u64((unsigned long)value);
+
+  print_i64(value);
+
+  print_i32((int)value);
+
+  print_i16((short)value);
 }

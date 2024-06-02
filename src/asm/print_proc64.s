@@ -3,11 +3,6 @@ global print_i64
 global print_hex
 
 %define STDOUT 1
-%define QWORD_SIZE(a) (a * 8)
-%define DWORD_SIZE(a) (a * 4)
-
-;section .data
-;        MSG DB "16", 0xa
 
 ;rax: dividendo/quociente
 ;rcx: divisor
@@ -26,32 +21,33 @@ print_hex:
         PUSH rbp  
         MOV rbp, rsp
         SUB rsp, 1         ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], 0xa;Adiciona uma quebra de linha no final. 
+        MOV BYTE [rsp], 0xa;Adiciona uma quebra neste byte. 
 
-        MOV rax, rdi       ;Guarda o arg0 uint em rax
-        MOV rcx, 16        ;Guarda 10 no register divisor, pois é decimal.
-        MOV rbx, 1;Limpa o register contador.
-loop_hex:
-        INC rbx           ;Incrementa o contador.
-        MOV rdx, 0        ;Limpa o register resto.
+        MOV rax, rdi       ;Guarda o arg0 em rax.
+        MOV rcx, 16        ;Guarda 16 no register divisor, pois é hexadecimal.
+        MOV rbx, 1         ;Limpa o register contador.
+loop_hex:                  ;Inicio do loop.
+        INC rbx            ;Incrementa o contador.
+        MOV rdx, 0         ;Limpa o register resto.
          
-        DIV rcx           ;Div para tirar o digito dec menos significativo de rax e guardar em rdx
+        DIV rcx            ;Div para tirar o digito hex menos significativo de rax e guardar em rdx.
         CMP dl, 0xA
         JGE case0_eg
         case0_l:
                 ADD dl, '0';Add rdx a ascii '0' para obter o simbolo numerico ascii.
                 JMP end_case0 
         case0_eg:
-                ADD dl, '0'+('@'-'9');Add rdx a ascii '0' para obter o simbolo numerico ascii.
+                ADD dl, '0'+('@'-'9')
         end_case0:
         
         SUB rsp, 1        ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], dl;Guarda o digito nesse espaço.
+        MOV BYTE [rsp], dl;Guarda o digito neste espaço.
          
-        TEST rax, rax     ;Compara o dividendo/quociente
-        JNZ loop_hex      ;volta ao inicio do loop se o quociente for diferente de 0
+        TEST rax, rax     ;Compara rax.
+        JNZ loop_hex      ;volta ao inicio do loop enquanto o quociente for diferente de 0.
 
         JMP end
+        
 ;==========================================
 ;========PRINT UNSIGNED 64 INTEGER=========
 ;==========================================
@@ -60,23 +56,23 @@ print_u64:
         PUSH rbp  
         MOV rbp, rsp
         SUB rsp, 1         ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], 0xa;Adiciona uma quebra de linha no final. 
+        MOV BYTE [rsp], 0xa;Adiciona uma quebra de linha neste byte. 
 
-        MOV rax, rdi       ;Guarda o arg0 uint em rax
+        MOV rax, rdi       ;Guarda o primeiro argumento em rax.
         MOV rcx, 10        ;Guarda 10 no register divisor, pois é decimal.
-        MOV rbx, 1;Limpa o register contador.
+        MOV rbx, 1         ;Limpa o register contador.
 loop_u64:
-        INC rbx           ;Incrementa o contador.
-        MOV rdx, 0        ;Limpa o register resto.
+        INC rbx            ;Incrementa o contador.
+        MOV rdx, 0         ;Limpa o register resto.
          
-        DIV rcx           ;Div para tirar o digito dec menos significativo de rax e guardar em rdx
-        ADD dl, '0'       ;Add rdx a ascii '0' para obter o simbolo numerico ascii.
+        DIV rcx            ;Div para tirar o digito dec menos significativo de rax e guardar em rdx.
+        ADD dl, '0'        ;Add rdx a ascii '0' para obter o simbolo numerico ascii.
         
-        SUB rsp, 1        ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], dl;Guarda o digito nesse espaço.
+        SUB rsp, 1         ;Empilha um byte de espaço a stack.
+        MOV BYTE [rsp], dl ;Guarda o digito neste espaço.
          
-        TEST rax, rax     ;Compara o dividendo/quociente
-        JNZ loop_u64      ;volta ao inicio do loop se o quociente for diferente de 0
+        TEST rax, rax      ;Compara rax.
+        JNZ loop_u64       ;volta ao inicio do loop enquanto o quociente for diferente de 0.
 
         JMP end
 
@@ -88,47 +84,54 @@ print_i64:
         ;start
         PUSH rbp
         MOV rbp, rsp
-        SUB rsp, 1         ;Adiciona um byte de espaço a stack para a flag.
-        MOV BYTE [rsp], 0  ;Empilha a flag na memoria.
+        SUB rsp, 1         ;Adiciona um byte de espaço a stack.
+        MOV BYTE [rsp], 0  ;Empilha a flag que indica se o numero é negativo na memoria.
         SUB rsp, 1         ;Adiciona um byte de espaço a stack.
         MOV BYTE [rsp], 0xa;Empilha uma quebra de linha. 
         
-        MOV rax, rdi       ;Guarda o arg0 uint em rax
+        MOV rax, rdi       ;Guarda o primeiro e único argumento em rax.
 
 sign_handling:
-        MOV rdx, rax       ;Copia rax para edx
-        SAR rdx, 0x3F      ;SAR o sign bit para que preencha todo o register.   
+        MOV rdx, rax       ;Copia rax para edx.
+        SAR rdx, 0x3F      ;SAR o sign bit para que preencha todo o register.
         TEST rdx, rdx      ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
         JZ end_signh       ;Pule se rdx = 0
 case_signed:
-        MOV BYTE [rbp-1], 1  ;Se rdx = -1, muda a flag para um, será util mais tarde.
-        MUL rdx       ;Multiplica rax por -1 para se inverter o sinal.
+        MOV BYTE [rbp-1], 1;Se rdx = -1, muda a flag para um, será util mais tarde.
+        MUL rdx            ;Multiplica rax por -1 para se inverter o sinal.
 end_signh:
 
         MOV rcx, 10        ;Guarda 10 no register divisor, pois é decimal.
-        MOV rbx,  1;Limpa o register contador com 1.
+        MOV rbx,  1        ;Limpa o register contador com 1.
 loop_i64:
         INC rbx            ;Incrementa o contador.
         MOV rdx, 0         ;Limpa o register resto.
          
-        DIV rcx            ;Div para tirar o digito dec menos significativo de rax e guardar em rdx
+        DIV rcx            ;Div para tirar o digito dec menos significativo de rax e guardar em rdx.
         ADD dl, '0'        ;Add rdx a ascii '0' para obter o simbolo numerico ascii.
         
         SUB rsp, 1         ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], dl ;Guarda o digito nesse espaço.
+        MOV BYTE [rsp], dl ;Guarda o digito neste espaço.
          
-        TEST rax, rax      ;Compara o dividendo/quociente
-        JNZ loop_i64       ;volta ao inicio do loop se o quociente for diferente de 0
+        TEST rax, rax      ;Compara rax.
+        JNZ loop_i64       ;volta ao inicio do loop se o quociente for diferente de 0.
              
 
-        CMP BYTE [rbp-1], 0  ;Lê o valor da flag com 0, isso indica que o valor é positivo
-        JE end             ;pula para o final se verdadeiro
-case_negative:
-        INC rbx
+        CMP BYTE [rbp-1], 0;Compara o valor da flag com 0, isso indica que o valor é positivo.
+        JE end             ;pula para o final se positivo
+case_negative:             ;Mas se for negativo...
+        INC rbx            ;Incremento o contador.
         SUB rsp, 1         ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], '-' ;Guarda o digito nesse espaço.               
+        MOV BYTE [rsp], '-';Guarda o digito neste espaço.               
         JMP end
 
+;==========================================
+;=================THE END==================
+;==========================================
+;Isso não é um procedimento.
+;É uma label que é compartilhado com todos os 3 procedimetos deste arquivo.
+;Essa única label contém o epilogo que finaliza todos os 3 procedimentos deste arquivo. 
+;Sua função é imprimir o que tiver de imprimir, e finalizar o procedimento que a chamar.
 end:
         ;write
         MOV rax, 1
