@@ -1,7 +1,7 @@
 global _start
 extern printf
 
-%include "print_proc.inc"
+%include "print_proc.asmh"
 section .text
 _start:
         MOV rbp, rsp

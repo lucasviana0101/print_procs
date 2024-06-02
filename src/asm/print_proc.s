@@ -18,6 +18,9 @@ global print_i16
 ;rbp: BP
 ;rsp: SP
 section .text
+;==========================================
+;=========PRINT SIGNED 32 INTEGER==========
+;==========================================
 print_i32:
         ;start
         PUSH rbp
@@ -62,6 +65,9 @@ loop_i32:
         MOV BYTE [rsp], '-' ;Guarda o digito nesse espaço.               
         JMP end
         
+;==========================================
+;=========PRINT SIGNED 32 INTEGER==========
+;==========================================       
 print_i16:
         ;start
         PUSH rbp
