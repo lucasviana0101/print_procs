@@ -4,7 +4,7 @@ ASMFLAGS = -f elf64
 
 all: app
 
-app: print_proc64.o print_proc.o src/c/print_proc.h src/c/wrapper.c
+app: print_proc64.o print_proc.o src/c/print_procs.h src/c/wrapper.c
 	$(CC) src/c/wrapper.c print_proc64.o print_proc.o -o build/app
 	mv print_proc.o build/print_proc.o
 	mv print_proc64.o build/print_proc64.o
