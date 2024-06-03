@@ -32,7 +32,7 @@ void wrapper(long value){
 
   print_u64((unsigned long)value);
 
-  print_i64(value);
+  print_i64((long)value);
 
   print_i32((int)value);
 

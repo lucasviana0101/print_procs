@@ -3,11 +3,14 @@ global print_i64
 global print_hex
 
 %define STDOUT 1
+%define counter [rbp-1]
+%define is_neg [rbp-2]
+%define FALSE 0
+%define TRUE 1
 
 ;rax: dividendo/quociente
 ;rcx: divisor
 ;rdx: resto
-;rbx: contador
 ;rdi: argumento > STDOUT
 ;rsi: = rbp
 ;rbp: BP
@@ -20,14 +23,14 @@ print_hex:
         ;start
         PUSH rbp  
         MOV rbp, rsp
-        SUB rsp, 1         ;Empilha um byte de espaço a stack.
+        SUB rsp, 2         ;Empilha 2 bytes de espaço a stack. Um para o contador e outro pra LF.
         MOV BYTE [rsp], 0xa;Adiciona uma quebra neste byte. 
 
         MOV rax, rdi       ;Guarda o arg0 em rax.
         MOV rcx, 16        ;Guarda 16 no register divisor, pois é hexadecimal.
-        MOV rbx, 1         ;Limpa o register contador.
+        MOV BYTE counter, 1;Limpa o register contador.
 loop_hex:                  ;Inicio do loop.
-        INC rbx            ;Incrementa o contador.
+        INC BYTE counter        ;Incrementa o contador.
         MOV rdx, 0         ;Limpa o register resto.
          
         DIV rcx            ;Div para tirar o digito hex menos significativo de rax e guardar em rdx.
@@ -55,14 +58,14 @@ print_u64:
         ;start
         PUSH rbp  
         MOV rbp, rsp
-        SUB rsp, 1         ;Empilha um byte de espaço a stack.
+        SUB rsp, 2         ;Empilha 2 bytes de espaço a stack.
         MOV BYTE [rsp], 0xa;Adiciona uma quebra de linha neste byte. 
 
         MOV rax, rdi       ;Guarda o primeiro argumento em rax.
         MOV rcx, 10        ;Guarda 10 no register divisor, pois é decimal.
-        MOV rbx, 1         ;Limpa o register contador.
+        MOV BYTE counter, 1;Limpa o register contador.
 loop_u64:
-        INC rbx            ;Incrementa o contador.
+        INC BYTE counter   ;Incrementa o contador.
         MOV rdx, 0         ;Limpa o register resto.
          
         DIV rcx            ;Div para tirar o digito dec menos significativo de rax e guardar em rdx.
@@ -84,10 +87,9 @@ print_i64:
         ;start
         PUSH rbp
         MOV rbp, rsp
-        SUB rsp, 1         ;Adiciona um byte de espaço a stack.
-        MOV BYTE [rsp], 0  ;Empilha a flag que indica se o numero é negativo na memoria.
-        SUB rsp, 1         ;Adiciona um byte de espaço a stack.
-        MOV BYTE [rsp], 0xa;Empilha uma quebra de linha. 
+        SUB rsp, 3            ;Adiciona 3 bytes de espaço a stack.
+        MOV BYTE is_neg, FALSE;Empilha a flag que indica se o numero é negativo na memoria.
+        MOV BYTE [rsp], 0xa   ;Empilha uma quebra de linha. 
         
         MOV rax, rdi       ;Guarda o primeiro e único argumento em rax.
 
@@ -97,14 +99,14 @@ sign_handling:
         TEST rdx, rdx      ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
         JZ end_signh       ;Pule se rdx = 0
 case_signed:
-        MOV BYTE [rbp-1], 1;Se rdx = -1, muda a flag para um, será util mais tarde.
-        MUL rdx            ;Multiplica rax por -1 para se inverter o sinal.
+        MOV BYTE is_neg, TRUE;Se rdx = -1, muda a flag para um, será util mais tarde.
+        MUL rdx              ;Multiplica rax por -1 para se inverter o sinal.
 end_signh:
-
         MOV rcx, 10        ;Guarda 10 no register divisor, pois é decimal.
-        MOV rbx,  1        ;Limpa o register contador com 1.
+        MOV BYTE counter, 1;Limpa o register contador com 1.
+
 loop_i64:
-        INC rbx            ;Incrementa o contador.
+        INC BYTE counter   ;Incrementa o contador.
         MOV rdx, 0         ;Limpa o register resto.
          
         DIV rcx            ;Div para tirar o digito dec menos significativo de rax e guardar em rdx.
@@ -117,12 +119,12 @@ loop_i64:
         JNZ loop_i64       ;volta ao inicio do loop se o quociente for diferente de 0.
              
 
-        CMP BYTE [rbp-1], 0;Compara o valor da flag com 0, isso indica que o valor é positivo.
-        JE end             ;pula para o final se positivo
-case_negative:             ;Mas se for negativo...
-        INC rbx            ;Incremento o contador.
-        SUB rsp, 1         ;Empilha um byte de espaço a stack.
-        MOV BYTE [rsp], '-';Guarda o digito neste espaço.               
+        CMP BYTE is_neg, FALSE;Compara o valor da flag com 0, isso indica que o valor é positivo.
+        JE end                ;pula para o final se positivo
+case_negative:                ;Mas se for negativo...
+        INC BYTE counter      ;Incremento o contador.
+        SUB rsp, 1            ;Empilha um byte de espaço a stack.
+        MOV BYTE [rsp], '-'   ;Guarda o digito neste espaço.               
         JMP end
 
 ;==========================================
@@ -136,8 +138,9 @@ end:
         ;write
         MOV rax, 1
         MOV rdi, STDOUT
-        MOV rsi, rsp ;guarda o stack pointer rsp no source register rsi
-        MOV rdx, rbx ;guarda o numero de bytes a serem lidos no registrador de dados rsx
+        MOV rsi, rsp          ;guarda o stack pointer rsp no source register rsi
+        mov rdx, 0            ;limpa rdx
+        MOV dl, counter       ;guarda o numero de bytes a serem lidos no registrador de dados rsx
         SYSCALL 
 
         ;end
