@@ -93,14 +93,13 @@ print_i64:
         
         MOV rax, rdi       ;Guarda o primeiro e único argumento em rax.
 
-sign_handling:
-        MOV rdx, rax       ;Copia rax para edx.
-        SAR rdx, 0x3F      ;SAR o sign bit para que preencha todo o register.
-        TEST rdx, rdx      ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
-        JZ end_signh       ;Pule se rdx = 0
+;Gerenciamento de sinal:
+        TEST rax, rax      ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
+        JNS end_signh      ;Pule se rdx = 0
 case_signed:
         MOV BYTE is_neg, TRUE;Se rdx = -1, muda a flag para um, será util mais tarde.
-        MUL rdx              ;Multiplica rax por -1 para se inverter o sinal.
+        MOV rdx, QWORD -1  ;Copia -1 para rdx.
+        MUL rdx            ;Multiplica rax por -1 para se inverter o sinal.
 end_signh:
         MOV rcx, 10        ;Guarda 10 no register divisor, pois é decimal.
         MOV BYTE counter, 1;Limpa o register contador com 1.

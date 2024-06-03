@@ -30,13 +30,13 @@ print_i32:
         MOV BYTE [rsp], 0xa   ;Empilha uma quebra de linha. 
         
         MOV eax, edi        ;Guarda o arg0 uint em rax
-sh32:
-        MOV edx, eax        ;Copia rax para edx
-        SAR edx, 0x1F       ;SAR o sign bit para que preencha todo o register.   
-        TEST edx, edx       ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
-        JZ end_sh32         ;Pule se rdx = 0
+        
+;Gerenciamento de sinal
+        TEST eax, eax       ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
+        JNS end_sh32         ;Pule se rdx = 0
 ;case_signed
         MOV BYTE is_neg, TRUE;Se rdx = -1, muda a flag para um, será util mais tarde.
+        MOV edx, DWORD -1
         MUL edx              ;Multiplica rax por -1 para se inverter o sinal.
 end_sh32:
 
@@ -75,13 +75,13 @@ print_i16:
         MOV BYTE [rsp], 0xa   ;Empilha uma quebra de linha.
                 
         MOV ax, di         ;Guarda o arg0 uint em rax
-sh16:
-        MOV dx, ax         ;Copia rax para edx
-        SAR dx, 0x1F       ;SAR o sign bit para que preencha todo o register.   
-        TEST dx, dx        ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
-        JZ end_sh16        ;Pule se rdx = 0
+
+;Gerenciamento de sinal
+        TEST ax, ax        ;Compara rdx. rdx = 0 se o numero for positivo e -1 se negativo.
+        JNS end_sh16        ;Pule se rdx = 0
 ;case_signed
         MOV BYTE is_neg, TRUE ;Se rdx = -1, muda a flag para um, será util mais tarde.
+        MOV dx, WORD -1
         MUL dx                ;Multiplica rax por -1 para se inverter o sinal.
 end_sh16:
 
