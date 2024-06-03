@@ -1,7 +1,7 @@
 global _start
 extern printf
 
-%include "print_proc.asmh"
+%include "print_procs.asmh"
 section .text
 _start:
         MOV rbp, rsp
@@ -13,15 +13,4 @@ _start:
 
 end:
         MOV rax, 60
-        SYSCALL
-
-
-print:
-        PUSH rbp
-        MOV rbp, rsp
-        ;code here:
-        
-        MOV rsp, rbp
-        POP rbp
-        RET
-        
+        SYSCALL       
