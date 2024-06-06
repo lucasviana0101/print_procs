@@ -26,7 +26,6 @@ if
   (cp "$PWD/src/asm/$PRINT_PROCS_H" "$LOCAL_INCLUDE/$PRINT_PROCS_H")
 then
   echo "$MSG0"
-  echo "$MSG1"
 else
   echo "$MSG_ERR"
 fi
