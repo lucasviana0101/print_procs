@@ -11,10 +11,7 @@ global print_hex
 ;rax: dividendo/quociente
 ;rcx: divisor
 ;rdx: resto
-;rdi: argumento > STDOUT
-;rsi: = rbp
-;rbp: BP
-;rsp: SP
+
 section .text
 ;==========================================
 ;=====PRINT UNSIGNED 64 INTEGER IN HEX=====

@@ -13,10 +13,7 @@ global print_i16
 ;rax: dividendo/quociente
 ;rcx: divisor
 ;rdx: resto
-;rdi: argumento > STDOUT
-;rsi: = rbp
-;rbp: BP
-;rsp: SP
+
 section .text
 ;==========================================
 ;=========PRINT SIGNED 32 INTEGER==========
